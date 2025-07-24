@@ -1,4 +1,4 @@
-//############################### Plugin 156: DUCO Serial GW - FanSpeed #################################
+//############################### Plugin 196: DUCO Serial GW - FanSpeed #################################
 //
 //  DUCO Serial Gateway to read out fanspeed 
 //
@@ -8,28 +8,28 @@
 
 #include "_Plugin_Helper.h"
 
-#define PLUGIN_156
-#define PLUGIN_ID_156           156
-#define PLUGIN_NAME_156         "DUCO Serial GW - FanSpeed"
-#define PLUGIN_READ_TIMEOUT_156   1000 // DUCOBOX askes "live" CO2 sensor info, so answer takes sometimes a second.
-#define PLUGIN_LOG_PREFIX_156   String("[P156] DUCO FanSpeed: ")
+#define PLUGIN_196
+#define PLUGIN_ID_196           196
+#define PLUGIN_NAME_196         "DUCO Serial GW - FanSpeed"
+#define PLUGIN_READ_TIMEOUT_196   1000 // DUCOBOX askes "live" CO2 sensor info, so answer takes sometimes a second.
+#define PLUGIN_LOG_PREFIX_196   String("[P196] DUCO FanSpeed: ")
 
-#define PLUGIN_VALUENAME1_156 "FanSpeed"
+#define PLUGIN_VALUENAME1_196 "FanSpeed"
 
-boolean Plugin_156_init = false;
+boolean Plugin_196_init = false;
 // when calling 'PLUGIN_READ', if serial port is in use set this flag and check in PLUGIN_ONCE_A_SECOND if serial port is free.
-bool P156_waitingForSerialPort = false;
+bool P196_waitingForSerialPort = false;
 
 typedef enum {
-    P156_CONFIG_LOG_SERIAL = 0,
-} P156PluginConfigs;
+    P196_CONFIG_LOG_SERIAL = 0,
+} P196PluginConfigs;
 
-boolean Plugin_156(byte function, struct EventStruct *event, String& string){
+boolean Plugin_196(byte function, struct EventStruct *event, String& string){
 	boolean success = false;
 
   	switch (function){
 		case PLUGIN_DEVICE_ADD: {
-      		Device[++deviceCount].Number = PLUGIN_ID_156;
+      		Device[++deviceCount].Number = PLUGIN_ID_196;
         	Device[deviceCount].Type = DEVICE_TYPE_DUMMY;
       		Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_SINGLE;
       		Device[deviceCount].Ports = 0;
@@ -45,23 +45,23 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
       	}
 
 		case PLUGIN_GET_DEVICENAME:{
-			string = F(PLUGIN_NAME_156);
+			string = F(PLUGIN_NAME_196);
 			break;
 		}
 
 		case PLUGIN_GET_DEVICEVALUENAMES:{
-			strcpy_P(ExtraTaskSettings.TaskDeviceValueNames[0], PSTR(PLUGIN_VALUENAME1_156));
+			strcpy_P(ExtraTaskSettings.TaskDeviceValueNames[0], PSTR(PLUGIN_VALUENAME1_196));
       		break;
    		}
 
 		case PLUGIN_WEBFORM_LOAD:{
-			addFormCheckBox(F("Log serial messages to syslog"), F("Plugin156_log_serial"), PCONFIG(P156_CONFIG_LOG_SERIAL));
+			addFormCheckBox(F("Log serial messages to syslog"), F("Plugin156_log_serial"), PCONFIG(P196_CONFIG_LOG_SERIAL));
 			success = true;
 			break;
 		}
 
 		case PLUGIN_WEBFORM_SAVE:{
-			PCONFIG(P156_CONFIG_LOG_SERIAL) = isFormItemChecked(F("Plugin156_log_serial"));
+			PCONFIG(P196_CONFIG_LOG_SERIAL) = isFormItemChecked(F("Plugin156_log_serial"));
 			success = true;
 			break;
 		}
@@ -70,8 +70,8 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 			if(serialPortInUseByTask == event->TaskIndex){
 				serialPortInUseByTask = 255;
 			}
-			String log = PLUGIN_LOG_PREFIX_156;
-			log += F("EXIT PLUGIN_156");
+			String log = PLUGIN_LOG_PREFIX_196;
+			log += F("EXIT PLUGIN_196");
 			addLogMove(LOG_LEVEL_INFO, log);
 			clearPluginTaskData(event->TaskIndex); // clear plugin taskdata
 			success = true;
@@ -80,12 +80,12 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 
 
 		case PLUGIN_INIT:{
-			if(!Plugin_156_init && !ventilation_gateway_disable_serial){
+			if(!Plugin_196_init && !ventilation_gateway_disable_serial){
 				Serial.begin(115200, SERIAL_8N1);
-				String log = PLUGIN_LOG_PREFIX_156;
+				String log = PLUGIN_LOG_PREFIX_196;
 				log += F("Init plugin done.");
 				addLogMove(LOG_LEVEL_INFO, log);
-				Plugin_156_init = true;
+				Plugin_196_init = true;
 			}
 
 			success = true;
@@ -93,11 +93,11 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
    		}
 
       	case PLUGIN_READ:{
-         	if (Plugin_156_init && !ventilation_gateway_disable_serial){
+         	if (Plugin_196_init && !ventilation_gateway_disable_serial){
 				String log;
 
 				if(loglevelActiveFor(LOG_LEVEL_DEBUG)){
-					log = PLUGIN_LOG_PREFIX_156;
+					log = PLUGIN_LOG_PREFIX_196;
 					log += F("start read, eventid:");
 					log += event->TaskIndex;
 					addLogMove(LOG_LEVEL_DEBUG, log);
@@ -107,21 +107,21 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 					serialPortInUseByTask = event->TaskIndex;
 
 					if(loglevelActiveFor(LOG_LEVEL_DEBUG)){
-						log = PLUGIN_LOG_PREFIX_156;
+						log = PLUGIN_LOG_PREFIX_196;
 						log += F("Start reading fanspeed");
 						addLogMove(LOG_LEVEL_DEBUG, log);
 					}
-					Plugin_156_startReadFanSpeed(PLUGIN_LOG_PREFIX_156);
+					Plugin_196_startReadFanSpeed(PLUGIN_LOG_PREFIX_196);
 				}else{
 					if(loglevelActiveFor(LOG_LEVEL_DEBUG)){
 						char serialPortInUse[40];
 						snprintf(serialPortInUse, sizeof(serialPortInUse)," %u, set flag to read data later.", serialPortInUseByTask);
-						log = PLUGIN_LOG_PREFIX_156;
+						log = PLUGIN_LOG_PREFIX_196;
 						log += F("Serial port in use by taskid");
 						log += serialPortInUse;
 						addLogMove(LOG_LEVEL_DEBUG, log);		
 					}		
-					P156_waitingForSerialPort = true;
+					P196_waitingForSerialPort = true;
 				}
          	}
 	        success = true;
@@ -130,21 +130,21 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 
 	   	case PLUGIN_ONCE_A_SECOND:{
 			if(!ventilation_gateway_disable_serial){
-				if(P156_waitingForSerialPort){
+				if(P196_waitingForSerialPort){
 					if(serialPortInUseByTask == 255){
-						Plugin_156(PLUGIN_READ, event, string);
-						P156_waitingForSerialPort = false;
+						Plugin_196(PLUGIN_READ, event, string);
+						P196_waitingForSerialPort = false;
 					}
 				}
 
 				if(serialPortInUseByTask == event->TaskIndex){
-					if( (millis() - ducoSerialStartReading) > PLUGIN_READ_TIMEOUT_156){
+					if( (millis() - ducoSerialStartReading) > PLUGIN_READ_TIMEOUT_196){
 						if(loglevelActiveFor(LOG_LEVEL_DEBUG)){
-							String log = PLUGIN_LOG_PREFIX_156;
+							String log = PLUGIN_LOG_PREFIX_196;
 							log += F("Serial reading timeout");
 							addLogMove(LOG_LEVEL_DEBUG, log);
 						}
-						DucoTaskStopSerial(PLUGIN_LOG_PREFIX_156);
+						DucoTaskStopSerial(PLUGIN_LOG_PREFIX_196);
 						serialPortInUseByTask = 255;
 					}
 				}
@@ -170,14 +170,14 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 				while( (result = DucoSerialInterrupt()) != DUCO_MESSAGE_FIFO_EMPTY && stop == false){
 					switch(result){
 						case DUCO_MESSAGE_ROW_END: {
-                  			receivedNewValue = Plugin_156_readFanSpeedProcessRow(PLUGIN_LOG_PREFIX_156, event->BaseVarIndex, PCONFIG(P156_CONFIG_LOG_SERIAL));
+                  			receivedNewValue = Plugin_196_readFanSpeedProcessRow(PLUGIN_LOG_PREFIX_196, event->BaseVarIndex, PCONFIG(P196_CONFIG_LOG_SERIAL));
 							if(receivedNewValue) sendData(event);
 							duco_serial_bytes_read = 0; // reset bytes read counter
 							break;
 						}
 						case DUCO_MESSAGE_END: {
-				     		DucoThrowErrorMessage(PLUGIN_LOG_PREFIX_156, result);
-							DucoTaskStopSerial(PLUGIN_LOG_PREFIX_156);
+				     		DucoThrowErrorMessage(PLUGIN_LOG_PREFIX_196, result);
+							DucoTaskStopSerial(PLUGIN_LOG_PREFIX_196);
 							serialPortInUseByTask = 255;
 							stop = true;
 							break;
@@ -193,7 +193,7 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
 		case PLUGIN_FIFTY_PER_SECOND: {
 			if(serialPortInUseByTask == event->TaskIndex){
 				if(serialSendCommandInProgress){
-					DucoSerialSendCommand(PLUGIN_LOG_PREFIX_156);
+					DucoSerialSendCommand(PLUGIN_LOG_PREFIX_196);
 				}
 			}
 	   		success = true;
@@ -204,7 +204,7 @@ boolean Plugin_156(byte function, struct EventStruct *event, String& string){
   	return success;
 }
 
-void Plugin_156_startReadFanSpeed(String logPrefix){
+void Plugin_196_startReadFanSpeed(String logPrefix){
 	// set this variables before sending command
 	ducoSerialStartReading = millis();
 	duco_serial_bytes_read = 0; // reset bytes read counter
@@ -223,7 +223,7 @@ void Plugin_156_startReadFanSpeed(String logPrefix){
 
 		>
 	*/
-bool Plugin_156_readFanSpeedProcessRow(String logPrefix, uint8_t userVarIndex, bool serialLoggingEnabled){
+bool Plugin_196_readFanSpeedProcessRow(String logPrefix, uint8_t userVarIndex, bool serialLoggingEnabled){
  
 	String log;
 	if(serialLoggingEnabled && loglevelActiveFor(LOG_LEVEL_DEBUG)){	     

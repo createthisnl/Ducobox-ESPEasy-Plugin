@@ -1,4 +1,4 @@
-//#################################### Plugin 152: DUCO Serial Box Sensors ##################################
+//#################################### Plugin 192: DUCO Serial Box Sensors ##################################
 //
 //  DUCO Serial Gateway to read out the optionally installed Box Sensors
 //
@@ -8,34 +8,34 @@
 
 #include "_Plugin_Helper.h"
 
-#define PLUGIN_152
-#define PLUGIN_ID_152           152
-#define PLUGIN_NAME_152         "DUCO Serial GW - Box Sensor - CO2"
-#define PLUGIN_READ_TIMEOUT_152   1000 // DUCOBOX askes "live" CO2 sensor info, so answer takes sometimes a second.
-#define PLUGIN_LOG_PREFIX_152   String("[P152] DUCO BOX SENSOR: ")
+#define PLUGIN_192
+#define PLUGIN_ID_192           192
+#define PLUGIN_NAME_192         "DUCO Serial GW - Box Sensor - CO2"
+#define PLUGIN_READ_TIMEOUT_192   1000 // DUCOBOX askes "live" CO2 sensor info, so answer takes sometimes a second.
+#define PLUGIN_LOG_PREFIX_192   String("[P192] DUCO BOX SENSOR: ")
 
-boolean Plugin_152_init = false;
+boolean Plugin_192_init = false;
 // when calling 'PLUGIN_READ', if serial port is in use set this flag and check in PLUGIN_ONCE_A_SECOND if serial port is free.
-bool P152_waitingForSerialPort = false;
+bool P192_waitingForSerialPort = false;
 
 typedef enum {
-   P152_CONFIG_LOG_SERIAL = 0,
-} P152PluginConfigs;
+   P192_CONFIG_LOG_SERIAL = 0,
+} P192PluginConfigs;
 
 typedef enum {
-   P152_DUCO_DEVICE_NA = 0, 
-   P152_DUCO_DEVICE_CO2 = 1, // not used here!
-   P152_DUCO_DEVICE_CO2_TEMP = 2,
-   P152_DUCO_DEVICE_RH = 3,
-} P152DucoSensorDeviceTypes;
+   P192_DUCO_DEVICE_NA = 0, 
+   P192_DUCO_DEVICE_CO2 = 1, // not used here!
+   P192_DUCO_DEVICE_CO2_TEMP = 2,
+   P192_DUCO_DEVICE_RH = 3,
+} P192DucoSensorDeviceTypes;
 
-boolean Plugin_152(byte function, struct EventStruct *event, String& string){
+boolean Plugin_192(byte function, struct EventStruct *event, String& string){
 	boolean success = false;
 
 	switch (function){
 
 		case PLUGIN_DEVICE_ADD: {
-			Device[++deviceCount].Number = PLUGIN_ID_152;
+			Device[++deviceCount].Number = PLUGIN_ID_192;
 			Device[deviceCount].Type = DEVICE_TYPE_DUMMY;
 			Device[deviceCount].VType = Sensor_VType::SENSOR_TYPE_DUAL;
 			Device[deviceCount].Ports = 0;
@@ -51,7 +51,7 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 		}
 
     	case PLUGIN_GET_DEVICENAME: {
-        	string = F(PLUGIN_NAME_152);
+        	string = F(PLUGIN_NAME_192);
         	break;
       	}
 
@@ -61,13 +61,13 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 		}
 
 		case PLUGIN_WEBFORM_LOAD: {
-			addFormCheckBox(F("Log serial messages to syslog"), F("Plugin152_log_serial"), PCONFIG(P152_CONFIG_LOG_SERIAL));
+			addFormCheckBox(F("Log serial messages to syslog"), F("Plugin152_log_serial"), PCONFIG(P192_CONFIG_LOG_SERIAL));
      	 	success = true;
       		break;
    		}
 
 		case PLUGIN_WEBFORM_SAVE: {
-			PCONFIG(P152_CONFIG_LOG_SERIAL) = isFormItemChecked(F("Plugin152_log_serial"));
+			PCONFIG(P192_CONFIG_LOG_SERIAL) = isFormItemChecked(F("Plugin152_log_serial"));
 			success = true;
 			break;
 		}
@@ -76,7 +76,7 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 			if(!ventilation_gateway_disable_serial){
 				Serial.begin(115200, SERIAL_8N1);
 			}
-			Plugin_152_init = true;
+			Plugin_192_init = true;
 			success = true;
 			break;
    		}
@@ -91,10 +91,10 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 
 
 		case PLUGIN_READ: {
-   			if (Plugin_152_init && !ventilation_gateway_disable_serial){
+   			if (Plugin_192_init && !ventilation_gateway_disable_serial){
 				String log;
 		   		if(loglevelActiveFor(LOG_LEVEL_DEBUG)){
-					log = PLUGIN_LOG_PREFIX_152;
+					log = PLUGIN_LOG_PREFIX_192;
 					log += F("start read, eventid:");
 					log += event->TaskIndex;
 					addLogMove(LOG_LEVEL_DEBUG, log);
@@ -104,18 +104,18 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 				if(serialPortInUseByTask == 255){
 					serialPortInUseByTask = event->TaskIndex;
 					if (loglevelActiveFor(LOG_LEVEL_DEBUG)) {
-						log = PLUGIN_LOG_PREFIX_152;
+						log = PLUGIN_LOG_PREFIX_192;
 						log += F("Start readBoxSensors");
 						addLogMove(LOG_LEVEL_DEBUG, log);
 					}
-            		startReadBoxSensors(PLUGIN_LOG_PREFIX_152);
+            		startReadBoxSensors(PLUGIN_LOG_PREFIX_192);
          		}else{
 					if (loglevelActiveFor(LOG_LEVEL_DEBUG)) {
-						log = PLUGIN_LOG_PREFIX_152;
+						log = PLUGIN_LOG_PREFIX_192;
 						log += F("Serial port in use, set flag to read data later.");
 						addLogMove(LOG_LEVEL_DEBUG, log);
 					}
-					P152_waitingForSerialPort = true;
+					P192_waitingForSerialPort = true;
 				}
       
       		}
@@ -126,23 +126,23 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 
 		case PLUGIN_ONCE_A_SECOND:{
 			if(!ventilation_gateway_disable_serial){
-				if(P152_waitingForSerialPort){
+				if(P192_waitingForSerialPort){
 					if(serialPortInUseByTask == 255){
-						Plugin_152(PLUGIN_READ, event, string);
-						P152_waitingForSerialPort = false;
+						Plugin_192(PLUGIN_READ, event, string);
+						P192_waitingForSerialPort = false;
 					}
 				}
 
 				if(serialPortInUseByTask == event->TaskIndex){
-					if( (millis() - ducoSerialStartReading) > PLUGIN_READ_TIMEOUT_152){
+					if( (millis() - ducoSerialStartReading) > PLUGIN_READ_TIMEOUT_192){
 						if (loglevelActiveFor(LOG_LEVEL_DEBUG)) {
 							String log;
-							log = PLUGIN_LOG_PREFIX_152;
+							log = PLUGIN_LOG_PREFIX_192;
 							log += F("Serial reading timeout");
 							addLogMove(LOG_LEVEL_DEBUG, log);
 						}
 
-               			DucoTaskStopSerial(PLUGIN_LOG_PREFIX_152);
+               			DucoTaskStopSerial(PLUGIN_LOG_PREFIX_192);
                			serialPortInUseByTask = 255;
             		}
          		}
@@ -167,14 +167,14 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 				while( (result = DucoSerialInterrupt()) != DUCO_MESSAGE_FIFO_EMPTY && stop == false){
 					switch(result){
 						case DUCO_MESSAGE_ROW_END: {
-							receivedNewValue = readBoxSensorsProcessRow(PLUGIN_LOG_PREFIX_152, P152_DUCO_DEVICE_CO2, event->BaseVarIndex, PCONFIG(P152_CONFIG_LOG_SERIAL));
+							receivedNewValue = readBoxSensorsProcessRow(PLUGIN_LOG_PREFIX_192, P192_DUCO_DEVICE_CO2, event->BaseVarIndex, PCONFIG(P192_CONFIG_LOG_SERIAL));
 							if(receivedNewValue) sendData(event);
 							duco_serial_bytes_read = 0; // reset bytes read counter
 							break;
 						}
 						case DUCO_MESSAGE_END: {
-							DucoThrowErrorMessage(PLUGIN_LOG_PREFIX_152, result);
-							DucoTaskStopSerial(PLUGIN_LOG_PREFIX_152);
+							DucoThrowErrorMessage(PLUGIN_LOG_PREFIX_192, result);
+							DucoTaskStopSerial(PLUGIN_LOG_PREFIX_192);
 							stop = true;
 							break;
 						}
@@ -189,7 +189,7 @@ boolean Plugin_152(byte function, struct EventStruct *event, String& string){
 		case PLUGIN_FIFTY_PER_SECOND: {
 			if(serialPortInUseByTask == event->TaskIndex){
 				if(serialSendCommandInProgress){
-					DucoSerialSendCommand(PLUGIN_LOG_PREFIX_152);
+					DucoSerialSendCommand(PLUGIN_LOG_PREFIX_192);
 				}
 			}
 			success = true;
@@ -270,7 +270,7 @@ bool readBoxSensorsProcessRow( String logPrefix, uint8_t sensorDeviceType, uint8
 		unsigned int raw_value;
 		char logBuf[30];
 
-	   	if(sensorDeviceType == P152_DUCO_DEVICE_CO2){     
+	   	if(sensorDeviceType == P192_DUCO_DEVICE_CO2){     
          	if (strlen("  CO") <= duco_serial_bytes_read && strncmp("  CO", (char*) duco_serial_buf, strlen("  CO")) == 0) {
             	char* startByteValue = strchr((char*) duco_serial_buf,':');
             	if(startByteValue != NULL ){
@@ -287,7 +287,7 @@ bool readBoxSensorsProcessRow( String logPrefix, uint8_t sensorDeviceType, uint8
         	}
       	}
 
-		if(sensorDeviceType == P152_DUCO_DEVICE_RH){
+		if(sensorDeviceType == P192_DUCO_DEVICE_RH){
          	if (strlen("  RH") <= duco_serial_bytes_read && strncmp("  RH", (char*) duco_serial_buf, strlen("  RH")) == 0) {
             	char* startByteValue = strchr((char*) duco_serial_buf,':');
             	if(startByteValue != NULL ){
@@ -305,7 +305,7 @@ bool readBoxSensorsProcessRow( String logPrefix, uint8_t sensorDeviceType, uint8
          	}
       	}
 
-		if(sensorDeviceType == P152_DUCO_DEVICE_CO2_TEMP || sensorDeviceType == P152_DUCO_DEVICE_RH){
+		if(sensorDeviceType == P192_DUCO_DEVICE_CO2_TEMP || sensorDeviceType == P192_DUCO_DEVICE_RH){
         	if (strlen("  TEMP") <= duco_serial_bytes_read && strncmp("  TEMP", (char*) duco_serial_buf, strlen("  TEMP")) == 0) {
 				log = logPrefix;
 				log += F("row starts with TEMP");
